@@ -1,11 +1,11 @@
 <?php
-$file = file('websites.txt');
+$file = file('../websites.txt');
 
 $today = date('d-m-Y');
 
 $vencidos = '';
 $erros = '';
-$ativos = '';
+$ativos = array();
 
 echo "HOJE: $today ('d-m-Y')" . PHP_EOL;
 foreach ($file as $link) {
@@ -38,11 +38,11 @@ foreach ($file as $link) {
 
     // OUTPUT
     if ($diff->format("%R%a") > 0) {
-        $ativos .= '----------------------------------------------------------' . PHP_EOL;
-        $ativos .= $url . PHP_EOL;
-        $ativos .= "ATIVO -> VALIDADE ATÉ: $valid_to" . PHP_EOL;
-        $ativos .= "Restam ".$diff->format("%R%a dias") . PHP_EOL;
-
+        $ativos[] = array(
+            'url' => $url,
+            'valid_to' => $valid_to,
+            'diff' => $diff->format("%R%a dias")
+        );
     } else {
         $vencidos .= '----------------------------------------------------------' . PHP_EOL;
         $vencidos .= $url . PHP_EOL;
@@ -51,6 +51,21 @@ foreach ($file as $link) {
     echo '■';
 }
 echo PHP_EOL;
+
+usort($ativos, function ($a, $b) {
+    return strtotime($a['valid_to']) - strtotime($b['valid_to']);
+});
+
+echo '===========================' . PHP_EOL;
+echo '           ATIVOS' . PHP_EOL;
+echo '===========================' . PHP_EOL;
+
+foreach ($ativos as $ativo) {
+    echo '----------------------------------------------------------' . PHP_EOL;
+    echo $ativo['url'] . PHP_EOL;
+    echo "ATIVO -> VALIDADE ATÉ: {$ativo['valid_to']}" . PHP_EOL;
+    echo "Restam {$ativo['diff']}" . PHP_EOL;
+}
 
 echo '===========================' . PHP_EOL;
 echo '          VENCIDOS' . PHP_EOL;
@@ -61,10 +76,3 @@ echo '===========================' . PHP_EOL;
 echo '            ERROS' . PHP_EOL;
 echo '===========================' . PHP_EOL;
 echo $erros . PHP_EOL;
-
-echo '===========================' . PHP_EOL;
-echo '           ATIVOS' . PHP_EOL;
-echo '===========================' . PHP_EOL;
-echo $ativos;
-
-
